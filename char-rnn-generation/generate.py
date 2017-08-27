@@ -5,9 +5,9 @@ import torch
 from helpers import *
 from model import *
 
-def generate(decoder, prime_str='A', predict_len=100, temperature=0.8):
+def generate(lang, decoder, prime_str='A', predict_len=100, temperature=0.8):
     hidden = decoder.init_hidden()
-    prime_input = char_tensor(prime_str)
+    prime_input = char_tensor(lang, prime_str)
     predicted = prime_str
 
     # Use priming string to "build up" hidden state
@@ -24,9 +24,9 @@ def generate(decoder, prime_str='A', predict_len=100, temperature=0.8):
         top_i = torch.multinomial(output_dist, 1)[0]
         
         # Add predicted character to string and use as next input
-        predicted_char = all_characters[top_i]
+        predicted_char = lang.index2char[top_i]
         predicted += predicted_char
-        inp = char_tensor(predicted_char)
+        inp = char_tensor(lang, predicted_char)
 
     return predicted
 
@@ -39,8 +39,8 @@ if __name__ == '__main__':
     argparser.add_argument('-l', '--predict_len', type=int, default=100)
     argparser.add_argument('-t', '--temperature', type=float, default=0.8)
     args = argparser.parse_args()
-
+    lang = Lang(args.filename)
     decoder = torch.load(args.filename)
     del args.filename
-    print(generate(decoder, **vars(args)))
+    print(generate(lang, decoder, **vars(args)))
 

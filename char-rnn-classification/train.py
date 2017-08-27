@@ -26,7 +26,15 @@ def randomTrainingPair():
     line_tensor = Variable(lineToTensor(line))
     return category, line, category_tensor, line_tensor
 
-rnn = RNN(n_letters, n_hidden, n_categories)
+import os
+filename = 'char-rnn-classification.pt'
+if os.path.isfile(filename):
+    print("load rnn from file.")
+    rnn = torch.load(filename)
+else:
+    print("create a new rnn.")
+    rnn = RNN(n_letters, n_hidden, n_categories)
+
 optimizer = torch.optim.SGD(rnn.parameters(), lr=learning_rate)
 criterion = nn.NLLLoss()
 
@@ -73,5 +81,5 @@ for epoch in range(1, n_epochs + 1):
         all_losses.append(current_loss / plot_every)
         current_loss = 0
 
-torch.save(rnn, 'char-rnn-classification.pt')
+torch.save(rnn, filename)
 
